@@ -20,6 +20,17 @@ export interface IBuyer {
   checkContactsValidation(data: Record<keyof TContactsInfo, string | number>): boolean;
 }
 
+export interface IBasket {
+  items: IProductItem[];
+  total: number;
+  count: number;
+  addItem(item: IProductItem): void;
+  removeItem(id: string): void;
+  clearBasket(): void;
+  getItem(id: string): IProductItem | undefined;
+  getItems(): IProductItem[];
+}
+
 export interface IProductList {
   total: number;
   items: IProductItem[];
@@ -30,7 +41,7 @@ export interface IProductList {
 
 export type TProductItemInfo = Pick<IProductItem, 'description' | 'image' | 'title' | 'category' | 'price'>;
 
-export type TBasketItemInfo = Pick<IProductItem, 'title' | 'price'>;
+export type TBasketItemInfo = Pick<IProductItem, 'id' | 'title' | 'price'>;
 
 export type TPaymentInfo = Pick<IBuyer, 'payment' | 'address'>;
 
