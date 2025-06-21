@@ -5,19 +5,19 @@ export interface IProductItem {
   title: string;
   category: string;
   price: number | null;
+  index: number;
 }
 
 export interface IBuyer {
-  payment: string;
+  orderId: string;
+  payment: TPaymentMethod;
   address: string;
   email: string;
-  phone: number;
-  getPaymentInfo(): TPaymentInfo;
-  getContactsInfo(): TContactsInfo;
-  clearPaymentInfo(paymentData: TPaymentInfo): void;
-  clearContactsInfo(contactsData: TContactsInfo): void;
-  checkPaymentValidation(data: Record<keyof TPaymentInfo, string>): boolean;
-  checkContactsValidation(data: Record<keyof TContactsInfo, string | number>): boolean;
+  phone: string;
+  clearBuyerData(): void;
+  getOrderInfo(): TOrderInfo;
+  checkPaymentValidation(): void;
+  checkContactsValidation(): void;
 }
 
 export interface IBasket {
@@ -27,22 +27,31 @@ export interface IBasket {
   addItem(item: IProductItem): void;
   removeItem(id: string): void;
   clearBasket(): void;
-  getItem(id: string): IProductItem | undefined;
-  getItems(): IProductItem[];
+  checkItem(id: string): boolean;
+  getOrderItems(): IProductItem[];
 }
 
 export interface IProductList {
-  total: number;
   items: IProductItem[];
-  preview: string | null;
-  setItems(items: IProductItem[]): void;
-  getProduct(id: string): IProductItem;
+  getProduct(id: string): IProductItem | undefined;
 }
 
-export type TProductItemInfo = Pick<IProductItem, 'description' | 'image' | 'title' | 'category' | 'price'>;
+export interface IApi {
+  baseUrl: string;
+  get<T>(uri: string): Promise<T>;
+  post<T>(uri: string, data: object, method?: TApiPostMethods): Promise<T>;
+}
 
-export type TBasketItemInfo = Pick<IProductItem, 'id' | 'title' | 'price'>;
+export interface IOrderResponse {
+  id?: string;
+  total?: number;
+  error?: string;
+}
 
-export type TPaymentInfo = Pick<IBuyer, 'payment' | 'address'>;
+export type TOrderInfo = Pick<IBuyer, 'payment' | 'address' | 'email' | 'phone'>
 
-export type TContactsInfo = Pick<IBuyer, 'email' | 'phone'>;
+export type TPaymentMethod = 'online' | 'offline' | null;
+
+export type TApiPostMethods = 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
+export type TProductCategory = 'софт-скил' | 'хард-скил' | 'другое' | 'кнопка' | 'дополнительное';
