@@ -42,13 +42,22 @@ export interface IApi {
   post<T>(uri: string, data: object, method?: TApiPostMethods): Promise<T>;
 }
 
+export interface IOrderData {
+  payment: string;
+  email: string;
+  phone: string;
+  address: string;
+  total: number;
+  items: string[];
+}
+
 export interface IOrderResponse {
   id?: string;
   total?: number;
   error?: string;
 }
 
-export type TOrderInfo = Pick<IBuyer, 'payment' | 'address' | 'email' | 'phone'>
+export type TOrderInfo = Pick<IBuyer, 'payment' | 'address' | 'email' | 'phone'>;
 
 export type TPaymentMethod = 'online' | 'offline' | null;
 

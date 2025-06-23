@@ -107,6 +107,19 @@ export interface IApi {
 }
 ```
 
+Интерфейс готового заказа для отправки на сервер
+
+```
+export interface IOrderData {
+  payment: string;
+  email: string;
+  phone: string;
+  address: string;
+  total: number;
+  items: string[];
+}
+```
+
 Интерфейс для ответа сервера
 
 ```
@@ -367,6 +380,7 @@ export type TProductCategory = 'софт-скил' | 'хард-скил' | 'др
 
 *События изменения данных (генерируются классами моделями данных)*
 - products:changed - изменение массива карточек с товарами
+- basket:changed - изменение содержимого корзины
 - payment:validation - изменение данных способа оплаты или адреса доставки
 - contacts:validation - изменение данных адреса электронной почты или номера телефона
 

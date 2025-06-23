@@ -2,7 +2,7 @@ import './scss/styles.scss';
 import { EventEmitter } from './components/base/events';
 import { BasketData } from './components/model/BasketData';
 import { ProductsData } from './components/model/ProductsData';
-import { IApi, IBuyer, TPaymentMethod } from './types';
+import { IApi, IBuyer, IOrderData, TPaymentMethod } from './types';
 import { Api } from './components/base/api';
 import { API_URL, settings } from './utils/constants';
 import { AppApi } from './components/model/AppApi';
@@ -51,15 +51,17 @@ const successModal = new SuccessModal(cloneTemplate(successModalTemplate), event
 api.getProducts()
 .then((items) => {
     productsData.items = items;
-    const productsArray = productsData.items.map((item) => {
-        const productsView = new ProductCatalog(cloneTemplate(catalogTemplate), events);
-        return productsView.render(item);
-    });
-    mainPage.render({ basketCounter: basketData.count, productItems: productsArray });
-
 })
 .catch((err) => {
     console.log(err);
+});
+
+events.on('products:changed', () => {
+    const productsArray = productsData.items.map((item) => {
+    const productsView = new ProductCatalog(cloneTemplate(catalogTemplate), events);
+        return productsView.render(item);
+    });
+    mainPage.render({ basketCounter: basketData.count, productItems: productsArray });
 });
 
 events.on('product:select', (data: { productId: string }) => {
@@ -77,29 +79,27 @@ events.on('modal:close', (lock: { state: boolean }) => {
 });
 
 events.on('basket:open', () => {
-    const productItems = basketData.items.map((item, index) => {
-        const product = new ProductBasket(cloneTemplate(basketTemplate), events);
-        return product.render({...item, index: index + 1 });
-    });
-    modal.content = basketModal.render({productsContainer: productItems, totalContainer: basketData.total});
+    modal.content = basketModal.render();
     modal.open();
 });
 
 events.on('product:add', (data: { productId: string }) => {
     const productItem = productsData.getProduct(data.productId);
     basketData.addItem(productItem);
-    mainPage.basketCounter = basketData.count;
     modal.close();
 });
 
 events.on('product:delete', (data: { productId: string }) => {
     basketData.removeItem(data.productId);
+});
+
+events.on('basket:changed', () => {
+    mainPage.basketCounter = basketData.count;
     const productItems = basketData.items.map((item, index) => {
         const product = new ProductBasket(cloneTemplate(basketTemplate), events);
-        return product.render({ ...item, index: index + 1 });
+        return product.render({...item, index: index + 1});
     });
     modal.content = basketModal.render({productsContainer: productItems, totalContainer: basketData.total});
-    mainPage.basketCounter = basketData.count;
 });
 
 events.on('basket:submit', () => {
@@ -141,11 +141,10 @@ events.on('phone:input', (data: { value: string }) => {
 });
 
 events.on('contacts:submit', () => {
-    api.postOrder(buyerData.getOrderInfo(), basketData.total, basketData.getOrderItems())
+    const orderData: IOrderData = {...buyerData.getOrderInfo(), total: basketData.total, items: basketData.getOrderItems().map(product => product.id)};
+    api.postOrder(orderData)
     .then((data) => {
-        console.log(data);
         basketData.clearBasket();
-        mainPage.basketCounter = basketData.count;
         successModal.total = data.total;
         modal.content = successModal.render();
     })

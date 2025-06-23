@@ -1,4 +1,4 @@
-import { IApi, IProductItem, IOrderResponse, TOrderInfo } from "../../types/index";
+import { IApi, IProductItem, IOrderResponse, IOrderData } from "../../types/index";
 
 export class AppApi {
   private _baseApi: IApi;
@@ -15,13 +15,7 @@ export class AppApi {
     return this._baseApi.get<IProductItem>(`/product/${id}`).then((product: IProductItem) => product);
   }
 
-  postOrder(orderData: TOrderInfo, total: number, products: IProductItem[]): Promise<IOrderResponse> {
-    const order = {};
-    const orderInfo = {
-      total: total,
-      items: products.map(product => product.id)
-    };
-    Object.assign(order, orderData, orderInfo);
-    return this._baseApi.post<IOrderResponse>(`/order`, order).then((response: IOrderResponse) => response);
+  postOrder(orderData: IOrderData): Promise<IOrderResponse> {
+    return this._baseApi.post<IOrderResponse>(`/order`, orderData).then((response: IOrderResponse) => response);
   }
 }
